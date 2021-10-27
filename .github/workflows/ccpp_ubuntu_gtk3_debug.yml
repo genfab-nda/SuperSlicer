@@ -24,9 +24,11 @@ jobs:
       uses: ASzc/change-string-case-action@v1
       with:
         string: ${{ github.event.repository.name }}
-    - if: ${{ github.event.repository.name }} != "Slic3r"
+    - name: set exec name
+      if: ${{ github.event.repository.name != "Slic3r" }}
       env:
         EXEC_NAME: "${{ steps.lowercase_repo.outputs.lowercase }}"
+      run: echo "current exec name is ${{ env.EXEC_NAME }}"
     - name: update submodule profiles
       working-directory: ./resources/profiles
       run: git submodule update --init
