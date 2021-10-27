@@ -10,6 +10,8 @@ jobs:
 
     runs-on: ubuntu-18.04
     
+    env:
+      EXEC_NAME: "${{ github.event.repository.name }}"
     steps:
     - uses: actions/checkout@v2
       with:
@@ -17,6 +19,14 @@ jobs:
     - name: update submodule profiles
       working-directory: ./resources/profiles
       run: git submodule update --init
+    - id: lowercase_repo
+      uses: ASzc/change-string-case-action@v1
+      with:
+        string: ${{ github.event.repository.name }}
+    - name: set exec name
+      if: ${{ github.event.repository.name != 'Slic3r' }}
+      env:
+        EXEC_NAME: "${{ steps.lowercase_repo.outputs.lowercase }}"
     - name: change date in version
       run: sed -i "s/+UNKNOWN//" version.inc
     - name: update clock
@@ -46,8 +56,8 @@ jobs:
       run: mkdir build
     - name: cmake
       working-directory: ./build
-      run: cmake .. -DSLIC3R_GTK=3 -DCMAKE_PREFIX_PATH="/home/runner/work/Slic3r/Slic3r/deps/build/destdir/usr/local" -DSLIC3R_STATIC=1
-    - name: make Slic3r
+      run: cmake .. -DSLIC3R_GTK=3 -DCMAKE_PREFIX_PATH="/home/runner/work/${{ github.event.repository.name }}/${{ github.event.repository.name }}/deps/build/destdir/usr/local" -DSLIC3R_STATIC=1
+    - name: make ${{ github.event.repository.name }}
       working-directory: ./build
       run: make Slic3r
     - name: make .mo
@@ -66,18 +76,18 @@ jobs:
       run: cp -Rf ../resources package/resources
     - name: copy bin
       working-directory: ./build
-      run: cp -f src/Slic3r package/bin/Slic3r
+      run: cp -f src/${{ env.EXEC_NAME }} package/bin/${{ env.EXEC_NAME }}
     - name: create sh from echo
       working-directory: ./build/package
       run: |
-        echo -e '#!/bin/bash\nDIR=$(readlink -f "$0" | xargs dirname)\nexport LD_LIBRARY_PATH="$DIR/bin"\nexec "$DIR/bin/Slic3r" "$@"' >Slic3r
-        chmod u+x Slic3r
-        tar -cvf ../Slic3r.tar .
+        echo -e '#!/bin/bash\nDIR=$(readlink -f "$0" | xargs dirname)\nexport LD_LIBRARY_PATH="$DIR/bin"\nexec "$DIR/bin/${{ env.EXEC_NAME }}" "$@"' >${{ env.EXEC_NAME }}
+        chmod u+x ${{ env.EXEC_NAME }}
+        tar -cvf ../${{ github.event.repository.name }}.tar .
     - name: Upload artifact
       uses: actions/upload-artifact@v1.0.0
       with:
         name: rc_linux.tar
-        path: build/Slic3r.tar
+        path: build/${{ github.event.repository.name }}.tar
     - name: build appimage
       working-directory: ./build/package
       run: |
@@ -85,10 +95,10 @@ jobs:
         ../build_appimage.sh
     - name: 'Tar files'
       working-directory: ./build/package
-      run: tar -cvf Slic3r_ubu64.AppImage.tar Slic3r_ubu64.AppImage
+      run: tar -cvf ${{ github.event.repository.name }}_ubu64.AppImage.tar ${{ github.event.repository.name }}_ubu64.AppImage
     - name: Upload appimage
       uses: actions/upload-artifact@v1.0.0
       with:
-        name: rc-Slic3r-AppImage.tar
-        path: build/package/Slic3r_ubu64.AppImage.tar
+        name: rc-${{ github.event.repository.name }}-AppImage.tar
+        path: build/package/${{ github.event.repository.name }}_ubu64.AppImage.tar
         
