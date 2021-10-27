@@ -78,12 +78,12 @@ jobs:
       run: cp -Rf ../resources package/resources
     - name: copy bin
       working-directory: ./build
-      run: cp -f src/${{ EXEC_NAME }} package/bin/${{ EXEC_NAME }}
+      run: cp -f src/${{ env.EXEC_NAME }} package/bin/${{ env.EXEC_NAME }}
     - name: create sh from echo
       working-directory: ./build/package
       run: |
-        echo -e '#!/bin/bash\nDIR=$(readlink -f "$0" | xargs dirname)\nexport LD_LIBRARY_PATH="$DIR/bin"\nexec "$DIR/bin/${{ EXEC_NAME }}" "$@"' >${{ EXEC_NAME }}
-        chmod u+x ${{ EXEC_NAME }}
+        echo -e '#!/bin/bash\nDIR=$(readlink -f "$0" | xargs dirname)\nexport LD_LIBRARY_PATH="$DIR/bin"\nexec "$DIR/bin/${{ env.EXEC_NAME }}" "$@"' >${{ env.EXEC_NAME }}
+        chmod u+x ${{ env.EXEC_NAME }}
         tar -cvf ../${{ github.event.repository.name }}.tar .
     - name: Upload artifact
       uses: actions/upload-artifact@v1.0.0
