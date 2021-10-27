@@ -28,7 +28,7 @@ jobs:
       if: ${{ github.event.repository.name != "Slic3r" }}
       env:
         EXEC_NAME: "${{ steps.lowercase_repo.outputs.lowercase }}"
-      run: echo "current exec name is ${{ env.EXEC_NAME }}"
+      run: echo "current exec name is -> ${{ env.EXEC_NAME }}"
     - name: update submodule profiles
       working-directory: ./resources/profiles
       run: git submodule update --init
