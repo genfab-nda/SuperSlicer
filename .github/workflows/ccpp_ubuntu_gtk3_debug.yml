@@ -25,7 +25,7 @@ jobs:
       with:
         string: ${{ github.event.repository.name }}
     - name: set exec name
-      if: ${{ github.event.repository.name != "Slic3r" }}
+      if: ${{ github.event.repository.name != 'Slic3r' }}
       env:
         EXEC_NAME: "${{ steps.lowercase_repo.outputs.lowercase }}"
       run: echo "current exec name is -> ${{ env.EXEC_NAME }}"
